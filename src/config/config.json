@@ -1,9 +1,10 @@
 {
   "gradeService": {
-    "baseUrl": "localhost:8080",
+    "baseUrl": "http://localhost:8080",
     "routes": {
-      "getAssignments": "/grading/list/${student_id}",
-      "pushToLive": "/curated-collections/push-live"
+      "getAssignments": "/grading/list/:studentId",
+      "getStudent": "/grading/student/:studentId",
+      "getResults": "/grading/results/:assignmentId"
 
     }
   }

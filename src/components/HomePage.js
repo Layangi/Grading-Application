@@ -7,10 +7,10 @@ import AppBar from 'material-ui/AppBar';
 import PropTypes from 'prop-types';
 import config from '../config/config.json';
 import axios from 'axios';
-import {BrowserRouter as Router} from "react-router-dom";
-import Routes from "../routes";
 import moment from "moment";
 import ResultModal from './ResultModal';
+import urlHelper from '../helpers/urlFormat.helper';
+import '../styles/components/HomePage.scss';
 
 export default class HomePage extends React.Component {
 
@@ -19,59 +19,62 @@ export default class HomePage extends React.Component {
     //         //username: PropTypes.object.isRequired,
     //         newStatus: PropTypes.object.isRequired
     //     };
-    // }
+    // } constructor(props){
+    //     super(props);
+    //   }
+    //
 
     constructor(props) {
         super(props);
 
         this.state = {
             assignments: [],
-            student:[],
+            student: [],
             totalItems: 0,
             showModal: false,
-            studentId: '10002'
-       }
+            studentId: '10002',
+            selectedRow: {}
+        }
     }
 
     componentDidMount() {
-        this.loadAssignments(this.state.studentId);
+        this.loadAssignments();
         this.loadStudentDetails();
     }
 
-  //  const fetchData = (date) => axios.get(`/fetch/${date}`);
+    loadAssignments = () => {
 
-    loadAssignments = (studentId) => {
+        const searchUrl = urlHelper.formatUrl(
+            config.gradeService.baseUrl + config.gradeService.routes.getAssignments,
+            {
+                studentId: this.state.studentId
+            }
+        );
 
-        axios.get('http://localhost:8080/grading/list/'+ studentId)
+        console.log("url = ", searchUrl)
+
+        axios.get(searchUrl)
             .then(res => {
                 const assignments = res.data;
-                this.setState({ assignments });
+                this.setState({assignments});
             })
-
-
-      //  let searchRoute = config.gradeService.baseUrl + config.gradeService.routes.getAssignments;
-
-        //const url = urlHelper.formatUrl(
-        //     config.contentService.baseUrl,
-        //     config.contentService.routes.pushLive,
-        //     {
-        //         status: checked === "0"
-        //     }
-        // );
-        // return AxiosClient.patch(url, selectedResources).then(response => {
-        //     setModalState(response.data, true);
-        // });
-
     }
 
     loadStudentDetails = () => {
-        axios.get(`localhost:8080/grading/student/10001`)
+
+        const studentUrl = urlHelper.formatUrl(
+            config.gradeService.baseUrl + config.gradeService.routes.getStudent,
+            {
+                studentId: this.state.studentId
+            }
+        );
+
+        axios.get(studentUrl)
             .then(res => {
                 const student = res.data;
-                this.setState({ student });
+                this.setState({student});
             })
     }
-
 
     generateLastModifiedDate = lastModified => {
         return moment(lastModified)
@@ -86,7 +89,10 @@ export default class HomePage extends React.Component {
         });
     };
 
-   render() {
+    render() {
+        console.log("assignment: " + this.state.assignments)
+        console.log( " Page 2 : " , this.props.profile)
+        console.log( "selectedRow: " , this.state.selectedRow)
         const columns = [
             {
                 Header: "Assignment ID",
@@ -135,48 +141,75 @@ export default class HomePage extends React.Component {
             },
         ]
         return (
+
+
             <div>
-                <MuiThemeProvider>
-                    <div>
-                        <AppBar
-                            title="Assignment Details"
-                        />
+                <div className="home-content-wrapper">
+                    <div className="home-content">
+                        <MuiThemeProvider>
+                            <div>
+                                <AppBar
+                                    title="Assignment Details"
+                                />
 
-                        <div>
-                            <label>Student Name:</label>{this.state.student.map(person=>person.name)}
-                        </div>
+                                {/*<div>*/}
+                                {/*    <label>Student Name:</label>{this.state.student.name}*/}
+                                {/*</div>*/}
 
-                <ReactTable
-                    data={this.state.assignments}
-                    columns={columns}
-                    defaultPageSize={10}
-                    //defaultPageSize={this.state.totalItems}
-                    pageSizeOptions={[2, 4, 5]}
-                    minRows={0}
-                    getTdProps={(state, rowInfo) => {
-                        return {
-                            style: {
-                                cursor: "pointer"
-                            }
-                            ,
-                            onClick: () => {
-                                this.setState({
-                                    showModal: true,
-                                    //selectedRow: rowInfo.original,
-                                });
-                            }
-                        };
-                    }}
-                />
+                                <div className="lable-div-wrapper">
+                                    <div className="student-detail">
+                                        <label>Student Name : </label>
+                                        <label>{this.state.student.name}</label>
+                                    </div>
+                                    <div className="student-detail">
+                                        <label>Student Id : </label>
+                                        <label>{this.state.student.id}</label>
+                                    </div>
+                                    <div className="student-detail">
+                                        <label>Class : </label>
+                                        <label>{this.state.student.grade}</label>
+                                    </div>
+                                </div>
+
+                                <div className="table-content">
+                                    <ReactTable
+                                        className="student-table"
+                                        data={this.state.assignments}
+                                        columns={columns}
+                                        defaultPageSize={10}
+                                        noDataText="There's no data to display"
+                                        pageSizeOptions={[2, 4, 5]}
+                                        minRows={0}
+                                        getTdProps={(state, rowInfo) => {
+                                            return {
+                                                style: {
+                                                    cursor: "pointer"
+                                                },
+                                                onClick: () => {
+                                                    this.setState({
+                                                        showModal: true,
+                                                        selectedRow: rowInfo.original,
+                                                    });
+                                                }
+                                            };
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                        </MuiThemeProvider>
                     </div>
-                </MuiThemeProvider>
+                </div>
 
                 {this.state.showModal ? (
                     <ResultModal
                         showSecondModal={this.showSecondModal}
                         showModal={this.state.showModal}
                         hideModal={this.hideModal}
-                       // profile={this.state.selectedRow}
+                        profile={this.state.selectedRow}
+                        successText={"Ok"}
+                        showCancel={false}
+                        //onSuccess={this.hideSecondModal}
                     />
                 ) : (" ")}
 
@@ -185,3 +218,17 @@ export default class HomePage extends React.Component {
     }
 
 }
+
+
+// import React from 'react';
+// import { UserConsumer } from '../user-context';
+//
+// export default function Homepage() {
+//     //console.log("name: " + {username})
+//     return (
+//         <UserConsumer>
+//             {({ username }) => <h1>Welcome : {username}!</h1>}
+//
+//         </UserConsumer>
+//     );
+// }
