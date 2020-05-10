@@ -1,7 +1,6 @@
 import React from "react";
 import ReactTable from "react-table";
 import 'react-table/react-table.css';
-import "react-table/react-table.css";
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import AppBar from 'material-ui/AppBar';
 import PropTypes from 'prop-types';
@@ -13,16 +12,6 @@ import urlHelper from '../helpers/urlFormat.helper';
 import '../styles/components/HomePage.scss';
 
 export default class HomePage extends React.Component {
-
-    // static get propTypes() {
-    //     return {
-    //         //username: PropTypes.object.isRequired,
-    //         newStatus: PropTypes.object.isRequired
-    //     };
-    // } constructor(props){
-    //     super(props);
-    //   }
-    //
 
     constructor(props) {
         super(props);
@@ -43,15 +32,13 @@ export default class HomePage extends React.Component {
     }
 
     loadAssignments = () => {
-
+        //hard coded the student id as login function is not implemented.
         const searchUrl = urlHelper.formatUrl(
             config.gradeService.baseUrl + config.gradeService.routes.getAssignments,
             {
                 studentId: this.state.studentId
             }
         );
-
-        console.log("url = ", searchUrl)
 
         axios.get(searchUrl)
             .then(res => {
@@ -76,12 +63,6 @@ export default class HomePage extends React.Component {
             })
     }
 
-    generateLastModifiedDate = lastModified => {
-        return moment(lastModified)
-            .local()
-            .format("YYYY-MM-DD");
-    };
-
     hideModal = () => {
         this.setState({
             showModal: false,
@@ -90,8 +71,6 @@ export default class HomePage extends React.Component {
     };
 
     render() {
-        console.log("assignment: " + this.state.assignments)
-        console.log( " Page 2 : " , this.props.profile)
         console.log( "selectedRow: " , this.state.selectedRow)
         const columns = [
             {
@@ -118,21 +97,23 @@ export default class HomePage extends React.Component {
                 Header: "Submitted Date",
                 accessor: "submitted_date",
                 sortable: true,
-                Cell: data => {
-                    return this.generateLastModifiedDate(
-                        data.submitted_date
-                    );
-                }
+                Cell: row => {
+                    return (<span>
+                        {row.original.submitted_date ? moment(row.original.submitted_date)
+                            .format("YYYY-MM-DD") : ""}
+                    </span>);
+                },
             },
             {
                 Header: "Due Date",
                 accessor: "due_data",
                 sortable: true,
-                Cell: data => {
-                    return this.generateLastModifiedDate(
-                        data.due_date
-                    );
-                }
+                Cell: row => {
+                    return (<span>
+                        {row.original.due_data ? moment(row.original.due_data)
+                            .format("YYYY-MM-DD") : ""}
+                    </span>);
+                },
             },
             {
                 Header: "Total Grade",
@@ -141,8 +122,6 @@ export default class HomePage extends React.Component {
             },
         ]
         return (
-
-
             <div>
                 <div className="home-content-wrapper">
                     <div className="home-content">
@@ -151,10 +130,6 @@ export default class HomePage extends React.Component {
                                 <AppBar
                                     title="Assignment Details"
                                 />
-
-                                {/*<div>*/}
-                                {/*    <label>Student Name:</label>{this.state.student.name}*/}
-                                {/*</div>*/}
 
                                 <div className="lable-div-wrapper">
                                     <div className="student-detail">
@@ -196,20 +171,17 @@ export default class HomePage extends React.Component {
                                     />
                                 </div>
                             </div>
-
                         </MuiThemeProvider>
                     </div>
                 </div>
 
                 {this.state.showModal ? (
                     <ResultModal
-                        showSecondModal={this.showSecondModal}
                         showModal={this.state.showModal}
                         hideModal={this.hideModal}
                         profile={this.state.selectedRow}
                         successText={"Ok"}
                         showCancel={false}
-                        //onSuccess={this.hideSecondModal}
                     />
                 ) : (" ")}
 
@@ -218,17 +190,3 @@ export default class HomePage extends React.Component {
     }
 
 }
-
-
-// import React from 'react';
-// import { UserConsumer } from '../user-context';
-//
-// export default function Homepage() {
-//     //console.log("name: " + {username})
-//     return (
-//         <UserConsumer>
-//             {({ username }) => <h1>Welcome : {username}!</h1>}
-//
-//         </UserConsumer>
-//     );
-// }

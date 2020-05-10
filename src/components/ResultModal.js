@@ -15,8 +15,7 @@ export default class ResultModal extends React.Component {
         this.state = {
             results:[],
             totalItems: 0,
-            showModal: false,
-            //assignmentId: '1006'
+            showModal: false
         }
     }
 
@@ -25,12 +24,6 @@ export default class ResultModal extends React.Component {
     }
 
     loadResults = () => {
-
-        // axios.get('localhost:8080/grading/results/1006')
-        //     .then(res => {
-        //         const results = res.data;
-        //         this.setState({results});
-        //     })
 
         const resultUrl = urlHelper.formatUrl(
             config.gradeService.baseUrl + config.gradeService.routes.getResults,
@@ -44,7 +37,6 @@ export default class ResultModal extends React.Component {
                 const results = res.data;
                 this.setState({ results });
             })
-
         }
 
         buildItem = () => {
@@ -76,28 +68,22 @@ export default class ResultModal extends React.Component {
                 data={this.state.results}
                 columns={columns}
                 defaultPageSize={10}
-                //defaultPageSize={this.state.totalItems}
                 pageSizeOptions={[5, 8, 9]}
                 minRows={5}
-
             />
         );
     };
 
 
     render() {
-        //console.log("Data: ", this.state.results)
-        //console.log( "selectedRow 2 : " , this.props.profile.id)
         return (
             <ModalDialog
-                title={"---Review Results---"}
+                title={"--- Review Results ---"}
                 showModal={this.props.showModal}
-                //onSuccess={this.onSuccess}
                 showFooter={true}
                 onCancel={this.props.hideModal}>
                 {this.buildItem()}
             </ModalDialog>
         );
-
     }
 }
